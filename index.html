@@ -2,451 +2,84 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SPRINTER Flow v9.2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>SPRINTER v9.5</title>
 <style>
-body{margin:0;background:#0f172a;color:white;font-family:sans-serif}
-.wrap{max-width:430px;margin:auto;padding:12px}
-.screen{display:none}.screen.active{display:block}
-.card{background:#1e293b;border-radius:16px;padding:14px;margin-bottom:12px}
-button{width:100%;padding:15px;border:none;border-radius:14px;font-weight:bold;font-size:15px;background:#facc15;color:#111;margin-top:8px}
-.trainBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.bar{height:10px;background:#111827;border-radius:999px;overflow:hidden;margin-top:4px}
-.fill{height:100%;background:linear-gradient(90deg,#60a5fa,#facc15)}
-.track{position:relative;height:360px;background:#374151;border-radius:14px;overflow:hidden}
-.runner{position:absolute;width:26px;height:26px;border-radius:50%;left:8px;transition:left .03s linear}
-.finish{position:absolute;top:0;bottom:0;right:18px;width:6px;background:repeating-linear-gradient(45deg,#fff 0,#fff 5px,#000 5px,#000 10px)}
-.line{position:absolute;left:0;right:0;height:1px;background:rgba(255,255,255,.25)}
-.log{white-space:pre-wrap;line-height:1.5;font-size:13px}
-.small{font-size:12px;opacity:.75;line-height:1.5}
-.notice{text-align:center;padding:26px 14px}
-.notice h1{font-size:28px;margin:0 0 10px}
-.notice .rule{font-size:18px;color:#facc15;font-weight:bold}
-.entry{background:#111827;border-radius:12px;padding:10px;margin:8px 0;font-size:13px}
-.me{border:1px solid #facc15}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#0f172a;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;overflow:hidden}
+.wrap{max-width:430px;height:100dvh;margin:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.screen{display:none;height:100%}.screen.active{display:flex;flex-direction:column;gap:8px}
+.card{background:#1e293b;border-radius:18px;padding:12px}.header{display:flex;justify-content:space-between;gap:8px}
+h1,h2,p{margin:0}h2{font-size:23px}.small{font-size:12px;opacity:.76;line-height:1.35}
+.badge{background:#111827;border:1px solid #334155;border-radius:999px;padding:5px 9px;font-size:12px;white-space:nowrap}
+.progress{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}.node{font-size:10px;padding:4px 7px;border-radius:999px;background:#111827;border:1px solid #475569}.now{background:#facc15!important;color:#111827;font-weight:900}.done{background:#14532d}.lock{opacity:.45}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:7px 10px;margin-top:10px}.stat{font-size:12px}.statTop{display:flex;justify-content:space-between;margin-bottom:4px}
+.bar{height:8px;background:#111827;border-radius:999px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,#60a5fa,#facc15)}
+.infoRow{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}.info{background:#111827;border-radius:10px;padding:7px 6px;font-size:12px;text-align:center}
+.trainArea{flex:1}.trainBtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}button{border:none;border-radius:14px;font-weight:900;font-size:15px;background:#facc15;color:#111827;padding:13px 8px}.rest{background:#dbeafe}
+.log{font-size:13px;line-height:1.35;white-space:pre-wrap;min-height:42px}.notice{text-align:center;margin:auto 0;padding:28px 14px}.notice h1{font-size:30px;margin:10px 0}.rule{font-size:18px;font-weight:900;color:#facc15;margin-bottom:10px}
+.entry{background:#111827;border-radius:12px;padding:9px;font-size:13px;line-height:1.35;margin-bottom:7px}.me{border:1px solid #facc15}
+.track{position:relative;height:54dvh;min-height:310px;background:#374151;border-radius:14px;overflow:hidden}.runner{position:absolute;width:25px;height:25px;border-radius:50%;left:8px;transition:left .03s linear}.finish{position:absolute;top:0;bottom:0;right:18px;width:6px;background:repeating-linear-gradient(45deg,#fff 0,#fff 5px,#000 5px,#000 10px)}.line{position:absolute;left:0;right:0;height:1px;background:rgba(255,255,255,.25)}
+.raceTop{display:flex;justify-content:space-between;align-items:center}#nextBtn{display:none}.record{font-size:13px;line-height:1.55;overflow:auto}
+@media(max-height:740px){.wrap{padding:8px;gap:6px}.card{padding:10px;border-radius:15px}h2{font-size:21px}button{padding:11px 6px;font-size:14px}.stats{gap:6px 8px}.track{height:50dvh;min-height:280px}}
+@media(max-height:670px){.stats{grid-template-columns:1fr 1fr 1fr}.track{height:47dvh;min-height:250px}.node{font-size:9px;padding:3px 6px}}
 </style>
 </head>
-<body>
-
-<div class="wrap">
-
-<section id="trainScreen" class="screen active">
-<div class="card">
-<h2>育成</h2>
-<div id="weekText"></div>
-<div id="stats"></div>
-</div>
-
-<div class="card">
-<h2>練習</h2>
-
-<div class="trainBtns">
-<button onclick="train('start')">スタート</button>
-<button onclick="train('form')">フォーム</button>
-<button onclick="train('stamina')">持久</button>
-<button onclick="train('power')">パワー</button>
-<button onclick="train('rest')">休息</button>
-</div>
-
-<div class="small">
-4週後に大会
-</div>
-
-</div>
-
-<div class="card">
-<div id="trainLog" class="log">
-練習を選択してください
-</div>
-</div>
+<body><div class="wrap">
+<section id="train" class="screen active">
+<div class="card"><div class="header"><div><h2>育成</h2><div id="week" class="small"></div></div><div class="badge" id="meet"></div></div><div id="prog" class="progress"></div><div id="stats" class="stats"></div><div class="infoRow"><div class="info" id="fat"></div><div class="info" id="combo"></div><div class="info" id="clear"></div></div></div>
+<div class="card trainArea"><h2 style="font-size:22px;margin-bottom:10px">練習</h2><div class="trainBtns"><button onclick="train('start')">スタート</button><button onclick="train('form')">フォーム</button><button onclick="train('stamina')">持久</button><button onclick="train('power')">パワー</button><button class="rest" onclick="train('rest')">休息</button><button onclick="train('special')">特殊</button></div></div>
+<div class="card"><div id="trainLog" class="log">練習を選択してください</div></div>
 </section>
-
-<section id="noticeScreen" class="screen">
-<div class="card notice">
-<div class="small">大会告知</div>
-<h1>県大会 決勝</h1>
-<div class="rule">突破条件：2位以内</div>
-<p class="small">
-4週間の育成結果をもって大会へ挑む
-</p>
-<button onclick="goEntry()">
-次へ
-</button>
+<section id="notice" class="screen"><div class="card notice"><div class="small">大会告知</div><h1 id="noticeTitle"></h1><div class="rule" id="noticeRule"></div><p class="small" id="noticeText"></p><button onclick="goEntry()">次へ</button></div></section>
+<section id="entry" class="screen"><div class="card"><h2>出場選手</h2><div id="entries"></div><button onclick="goRace()">レースへ</button></div></section>
+<section id="race" class="screen"><div class="card raceTop"><div><h2>レース</h2><div class="small" id="raceSub"></div></div><div class="badge" id="raceBadge"></div></div><div class="track" id="track"><div class="finish"></div><div class="line" style="top:25%"></div><div class="line" style="top:50%"></div><div class="line" style="top:75%"></div></div><div class="card"><div id="raceLog" class="log">レース開始...</div><button id="nextBtn" onclick="afterRace()">次へ</button></div></section>
+<section id="recordScreen" class="screen"><div class="card"><h2>記録</h2><div id="record" class="record"></div><button onclick="location.reload()">最初から</button></div></section>
 </div>
-</section>
-
-<section id="entryScreen" class="screen">
-<div class="card">
-<h2>出場選手</h2>
-
-<div class="entry">
-1 東海高 速水<br>
-前半型 / 好調
-</div>
-
-<div class="entry">
-2 白峰高 神崎<br>
-後半型 / 絶好調
-</div>
-
-<div class="entry me">
-3 あなた<br>
-育成型 / 普通
-</div>
-
-<div class="entry">
-4 世界学院 レオン<br>
-万能型 / 普通
-</div>
-
-<button onclick="goMeet()">
-レースへ
-</button>
-
-</div>
-</section>
-
-<section id="meetScreen" class="screen">
-
-<div class="card">
-
-<h2>レース</h2>
-
-<div class="small">
-レース進行中...
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="track" id="track">
-
-<div class="finish"></div>
-
-<div class="line" style="top:90px"></div>
-<div class="line" style="top:180px"></div>
-<div class="line" style="top:270px"></div>
-
-</div>
-
-</div>
-
-<div class="card">
-
-<div id="raceLog" class="log">
-レース開始...
-</div>
-
-<button id="nextBtn" onclick="nextSeason()" style="display:none">
-次へ
-</button>
-
-</div>
-
-</section>
-
-</div>
-
 <script>
-
-const player={
-dash:60,
-quick:60,
-stamina:60,
-form:60,
-guts:60,
-spurt:60,
-fatigue:60,
-week:1
-};
-
-function show(id){
-
-document.querySelectorAll(".screen").forEach(s=>{
-s.classList.remove("active");
-});
-
-document.getElementById(id).classList.add("active");
-
-}
-
-function render(){
-
-document.getElementById("weekText").innerHTML=
-"第"+player.week+"週";
-
-document.getElementById("stats").innerHTML=`
-
-ダッシュ
-<div class="bar"><div class="fill" style="width:${player.dash}%"></div></div>
-
-瞬発
-<div class="bar"><div class="fill" style="width:${player.quick}%"></div></div>
-
-スタミナ
-<div class="bar"><div class="fill" style="width:${player.stamina}%"></div></div>
-
-フォーム
-<div class="bar"><div class="fill" style="width:${player.form}%"></div></div>
-
-根性
-<div class="bar"><div class="fill" style="width:${player.guts}%"></div></div>
-
-スパート
-<div class="bar"><div class="fill" style="width:${player.spurt}%"></div></div>
-
-疲労:${Math.round(player.fatigue)}
-
-`;
-
-}
-
-function train(type){
-
-let txt="";
-
-if(type==="start"){
-player.dash+=3;
-player.quick+=3;
-player.fatigue+=20;
-txt="前半加速が強化された";
-}
-
-if(type==="form"){
-player.form+=4;
-player.fatigue+=14;
-txt="フォーム改善";
-}
-
-if(type==="stamina"){
-player.stamina+=4;
-player.fatigue+=16;
-txt="中盤維持力アップ";
-}
-
-if(type==="power"){
-player.guts+=5;
-player.spurt+=5;
-player.fatigue+=24;
-txt="ラストスパート強化";
-}
-
-if(type==="rest"){
-player.fatigue-=40;
-
-if(player.fatigue<0){
-player.fatigue=0;
-}
-
-txt="疲労回復";
-}
-
-player.week++;
-
-render();
-
-document.getElementById("trainLog").innerText=txt;
-
-if(player.week>4){
-
-show("noticeScreen");
-
-}
-
-}
-
-function goEntry(){
-
-show("entryScreen");
-
-}
-
-function goMeet(){
-
-show("meetScreen");
-
-startRace();
-
-}
-
-function startRace(){
-
-document.getElementById("nextBtn").style.display="none";
-
-const track=document.getElementById("track");
-
-track.querySelectorAll(".runner").forEach(e=>{
-e.remove();
-});
-
-const racers=[
-{x:0,v:0,color:"#60a5fa",type:"front"},
-{x:0,v:0,color:"#f472b6",type:"late"},
-{x:0,v:0,color:"#facc15",type:"player"},
-{x:0,v:0,color:"#22c55e",type:"balance"}
+const stages=[{k:"district",n:"地区大会",q:3},{k:"pref",n:"県大会 決勝",q:2},{k:"national",n:"全国大会",q:1},{k:"asia",n:"アジア大会",q:1},{k:"world",n:"世界大会",q:1},{k:"space",n:"宇宙大会",q:1,h:true}];
+const p={dash:60,quick:60,stamina:60,form:60,guts:60,spurt:60,fatigue:60,week:1,grade:1,stage:0,world:false,space:false,true:false,best:null,hist:[],lastRank:null,th:[],combo:"なし"};
+const rivals=[
+{name:"速水",school:"東海高",type:"front",dash:78,quick:82,stamina:52,form:54,guts:55,spurt:50,fatigue:85,cond:"普通",growth:"early",hist:[]},
+{name:"神崎",school:"白峰高",type:"late",dash:52,quick:55,stamina:66,form:68,guts:86,spurt:90,fatigue:65,cond:"好調",growth:"late",hist:[]},
+{name:"三枝",school:"青葉高",type:"stamina",dash:58,quick:56,stamina:84,form:82,guts:62,spurt:58,fatigue:55,cond:"普通",growth:"steady",hist:[]},
+{name:"黒瀬",school:"黒川高",type:"frontLate",dash:80,quick:75,stamina:50,form:52,guts:78,spurt:82,fatigue:140,cond:"不調",growth:"burst",hist:[]},
+{name:"皇",school:"帝都学園",type:"balance",dash:72,quick:72,stamina:72,form:72,guts:72,spurt:72,fatigue:70,cond:"普通",growth:"elite",hist:[]},
+{name:"レオン",school:"世界学院",type:"balance",dash:84,quick:84,stamina:84,form:84,guts:84,spurt:84,fatigue:60,cond:"普通",growth:"elite",hist:[]}
 ];
-
-racers.forEach((r,i)=>{
-
-const el=document.createElement("div");
-
-el.className="runner";
-
-el.style.top=(i*90+20)+"px";
-
-el.style.background=r.color;
-
-track.appendChild(el);
-
-r.el=el;
-
-});
-
-let timer=setInterval(()=>{
-
-racers.forEach(r=>{
-
-if(r.x>=100) return;
-
-let accel=.3;
-
-if(r.type==="player"){
-
-if(r.x<30){
-
-accel+=(player.dash+player.quick)/200;
-
+const R=(a,b)=>a+Math.random()*(b-a), st=()=>stages[p.stage], show=id=>{document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active")};
+function condRate(c){return {絶好調:1.15,好調:1.07,普通:1,不調:.9,絶不調:.78}[c]||1}
+function comboName(){let h=p.th.slice(-2).join("-");return {"start-form":"前半維持","stamina-power":"ラスト強化","form-stamina":"停滞耐性","start-start":"超加速","rest-power":"好調パワー","special-power":"覚醒スパート","form-special":"フォーム覚醒"}[h]||"なし"}
+function comboDesc(c){return {前半維持:"前半で飛び出しても中盤で垂れにくい",ラスト強化:"終盤の加速が強くなる",停滞耐性:"中盤の急失速を抑える",超加速:"序盤加速が大幅上昇",好調パワー:"終盤が安定",覚醒スパート:"終盤で一瞬伸びやすい",フォーム覚醒:"速度ブレが減る",なし:"なし"}[c]||"なし"}
+function stat(label,key){let v=Math.round(p[key]);return `<div class="stat"><div class="statTop"><span>${label}</span><span>${v}</span></div><div class="bar"><div class="fill" style="width:${Math.min(100,v)}%"></div></div></div>`}
+function render(){
+document.getElementById("week").textContent=p.grade+"年 / 第"+p.week+"週";document.getElementById("meet").textContent=st().n;
+document.getElementById("stats").innerHTML=stat("ダッシュ","dash")+stat("瞬発","quick")+stat("スタミナ","stamina")+stat("フォーム","form")+stat("根性","guts")+stat("スパート","spurt");
+document.getElementById("fat").textContent="疲労 "+Math.round(p.fatigue);document.getElementById("combo").textContent="コンボ "+p.combo;document.getElementById("clear").textContent=p.true?"真クリア":p.world?"世界制覇":p.space?"宇宙解放":"未クリア";
+document.getElementById("prog").innerHTML=stages.map((s,i)=>{if(s.h&&!p.space)return `<span class="node lock">???</span>`;return `<span class="node ${i<p.stage?'done':i===p.stage?'now':''}">${s.n.replace(" 決勝","")}</span>`}).join("");
 }
-else if(r.x<70){
-
-accel+=(player.stamina+player.form)/260;
-
-if(player.fatigue>180){
-
-accel-=.4;
-
+function train(t){
+let txt="";if(t==="start"){p.dash+=3;p.quick+=3;p.fatigue+=20;txt="前半加速が強化された"}if(t==="form"){p.form+=4;p.fatigue+=14;txt="フォーム改善"}if(t==="stamina"){p.stamina+=4;p.fatigue+=16;txt="中盤維持力アップ"}if(t==="power"){p.guts+=5;p.spurt+=5;p.fatigue+=24;txt="ラストスパート強化"}if(t==="rest"){p.fatigue=Math.max(0,p.fatigue-40);txt="疲労回復"}if(t==="special"){p.dash+=2;p.form+=2;p.spurt+=2;p.fatigue+=22;txt="特殊練習：総合的に強化"}
+p.th.push(t);p.combo=comboName();p.week++;render();document.getElementById("trainLog").innerText=txt+"\nコンボ："+p.combo+"\n"+comboDesc(p.combo);if(p.week>4)notice();
 }
-
+function updateRivals(){
+let stagePower=p.stage*5+(p.grade-1)*6;rivals.forEach(r=>{r.fatigue=Math.max(0,r.fatigue-R(22,48));let last=r.hist[r.hist.length-1];if(last&&last.rank<=2)r.fatigue+=22;if(last&&last.rank>=4)r.fatigue=Math.max(0,r.fatigue-10);let roll=Math.random();if(r.fatigue>210)r.cond=roll<.62?"不調":"絶不調";else if(roll<.1)r.cond="絶好調";else if(roll<.32)r.cond="好調";else if(roll<.76)r.cond="普通";else if(roll<.92)r.cond="不調";else r.cond="絶不調";let g=.8+stagePower*.04;if(r.growth==="late"&&p.grade>=2)g+=1.2;if(r.growth==="elite")g+=1.5;if(r.growth==="burst"&&Math.random()<.28)g+=3.2;["dash","quick","stamina","form","guts","spurt"].forEach(k=>r[k]+=R(.2,g))})
 }
-else{
-
-accel+=(player.guts+player.spurt)/220;
-
+function notice(){updateRivals();document.getElementById("noticeTitle").textContent=st().n;document.getElementById("noticeRule").textContent="突破条件："+st().q+"位以内";document.getElementById("noticeText").textContent=st().k==="space"?"隠し大会。人類の限界を超えろ。":"4週間の育成結果をもって大会へ挑む";show("notice")}
+function temp(n,sc,t,pow){return {name:n,school:sc,type:t,dash:pow,quick:pow,stamina:pow,form:pow,guts:pow,spurt:pow,fatigue:R(30,90),cond:"普通",hist:[]}}
+function stageRivals(){let k=st().k;if(k==="district")return [rivals[0],rivals[1],rivals[2]];if(k==="pref")return [rivals[0],rivals[1],rivals[3]];if(k==="national")return [rivals[1],rivals[3],rivals[4]];if(k==="asia")return [rivals[4],temp("ミン","韓国代表","front",82),temp("雷","中国代表","stamina",84)];if(k==="world")return [rivals[5],temp("キング","ジャマイカ代表","late",92),temp("ジョンソン","USA代表","frontLate",90)];if(k==="space")return [temp("アレス","火星代表","front",105),temp("ルナ","月面代表","late",108),temp("オルガ","銀河代表","balance",112)]}
+function tl(t){return {front:"前半型",late:"後半型",stamina:"中盤型",frontLate:"前半+終盤",balance:"万能型"}[t]||"万能型"}
+function goEntry(){let list=stageRivals();document.getElementById("entries").innerHTML=list.map((r,i)=>`<div class="entry">${i+1} ${r.school} ${r.name}<br>${tl(r.type)} / ${r.cond} / 疲労${Math.round(r.fatigue)}</div>`).join("")+`<div class="entry me">4 あなた<br>育成型 / 疲労${Math.round(p.fatigue)}<br>コンボ：${p.combo}</div>`;show("entry")}
+function goRace(){show("race");document.getElementById("raceBadge").textContent=st().n;document.getElementById("raceSub").textContent=p.combo==="なし"?"自動スタート":"コンボ："+p.combo;document.getElementById("raceLog").textContent="レース開始...";setTimeout(startRace,160)}
+function startRace(){
+document.getElementById("nextBtn").style.display="none";let track=document.getElementById("track");track.querySelectorAll(".runner").forEach(e=>e.remove());let boost={district:0,pref:18,national:36,asia:50,world:66,space:88}[st().k]||0;
+let racers=[...stageRivals().map((r,i)=>({x:0,v:0,color:["#60a5fa","#f472b6","#22c55e"][i],type:r.type,name:r.name,base:r,power:((r.dash+r.quick+r.stamina+r.form+r.guts+r.spurt)/6)+boost,fatigue:r.fatigue,cond:r.cond})),{x:0,v:0,color:"#facc15",type:"player",name:"あなた"}];
+let h=track.clientHeight,w=track.clientWidth-54;racers.forEach((r,i)=>{let el=document.createElement("div");el.className="runner";el.style.top=(i*(h/4)+18)+"px";el.style.background=r.color;track.appendChild(el);r.el=el});
+let timer=setInterval(()=>{racers.forEach(r=>{if(r.x>=100)return;let a=.3;if(r.type==="player"){if(r.x<30){a+=(p.dash+p.quick)/200;if(p.combo==="超加速")a+=.36}else if(r.x<70){a+=(p.stamina+p.form)/260;if(p.fatigue>180)a-=.4;if(p.combo==="前半維持")a+=.18;if(p.combo==="停滞耐性")a+=.22;if(p.combo==="フォーム覚醒")a+=.12}else{a+=(p.guts+p.spurt)/220;if(p.combo==="ラスト強化")a+=.36;if(p.combo==="好調パワー")a+=.22;if(p.combo==="覚醒スパート"&&Math.random()<.08)a+=.75}}else{let cr=condRate(r.cond);if(r.type==="front"){if(r.x<40)a+=.40+r.power/185;else a-=.08}if(r.type==="late"){if(r.x<60)a+=.08+r.power/330;else a+=.40+r.power/195}if(r.type==="stamina"){if(r.x<70)a+=.26+r.power/230;else a+=.18+r.power/260}if(r.type==="frontLate"){if(r.x<35)a+=.38+r.power/200;else if(r.x<70)a-=.12;else a+=.44+r.power/205}if(r.type==="balance")a+=.24+r.power/225;a*=cr;if(r.fatigue>190&&r.x>50&&r.x<82)a-=.25}if(st().k==="space"&&r.type!=="player"&&r.x>75)a+=.28;if(p.combo==="フォーム覚醒"){if(Math.random()<.01)a-=.5;if(Math.random()<.012)a+=.6}else{if(Math.random()<.02)a-=.8;if(Math.random()<.03)a+=1}r.v+=a*.05;if(r.v<.5)r.v=.5;r.x+=r.v;r.el.style.left=(8+(r.x/100)*w)+"px"});
+if(racers.every(r=>r.x>=100)){clearInterval(timer);racers.sort((a,b)=>b.x-a.x);let rank=racers.findIndex(r=>r.type==="player")+1;p.lastRank=rank;let time=(12.2-rank*.12-(p.dash+p.quick+p.spurt)/300+Math.random()*.25).toFixed(2);if(!p.best||Number(time)<Number(p.best))p.best=time;p.hist.push({grade:p.grade,stage:st().n,rank,time,combo:p.combo});racers.forEach((r,i)=>{if(r.base&&rivals.includes(r.base)){r.base.hist.push({rank:i+1,stage:st().n});r.base.fatigue=Math.min(300,r.base.fatigue+80-(i+1)*8)}});let ok=rank<=st().q;document.getElementById("raceLog").innerText=`あなたは${rank}位 / ${time}秒\nコンボ：${p.combo}\n\n${ok?"突破！":"敗退…"}`;document.getElementById("nextBtn").style.display="block"}},30)
 }
-
-}
-
-if(r.type==="front"){
-
-if(r.x<40){
-
-accel+=.7;
-
-}
-else{
-
-accel-=.15;
-
-}
-
-}
-
-if(r.type==="late"){
-
-if(r.x<60){
-
-accel+=.1;
-
-}
-else{
-
-accel+=.8;
-
-}
-
-}
-
-if(r.type==="balance"){
-
-accel+=.35;
-
-}
-
-if(Math.random()<0.02){
-
-accel-=.8;
-
-}
-
-if(Math.random()<0.03){
-
-accel+=1.0;
-
-}
-
-r.v+=accel*.05;
-
-if(r.v<0.5){
-
-r.v=.5;
-
-}
-
-r.x+=r.v;
-
-r.el.style.left=(r.x*3)+"px";
-
-});
-
-if(racers.every(r=>r.x>=100)){
-
-clearInterval(timer);
-
-racers.sort((a,b)=>b.x-a.x);
-
-const rank=racers.findIndex(r=>r.type==="player")+1;
-
-let text="";
-
-if(rank<=2){
-
-text="突破！ 次の大会へ進める";
-
-}
-else{
-
-text="敗退…";
-
-}
-
-document.getElementById("raceLog").innerText=
-"あなたは"+rank+"位\n\n"+text;
-
-document.getElementById("nextBtn").style.display="block";
-
-}
-
-},30);
-
-}
-
-function nextSeason(){
-
-player.week=1;
-
-show("trainScreen");
-
+function afterRace(){let ok=p.lastRank<=st().q;if(ok){if(st().k==="world"){p.world=true;p.space=true;p.stage=5;reset("世界大会優勝！ 隠し大会『宇宙大会』が解放された。");return}if(st().k==="space"){p.true=true;advance("宇宙大会優勝！ 真クリア達成。引退まで記録更新を狙えます。");return}p.stage++;reset("次の大会へ進出！");return}if(p.grade>=3){showRecord();return}p.grade++;p.stage=0;reset("敗退。次年度へ。地区大会から再挑戦。")}
+function advance(msg){if(p.grade>=3){showRecord();return}p.grade++;p.stage=0;reset(msg+" 次年度へ進みます。")}
+function reset(msg){p.week=1;p.th=[];p.combo="なし";p.fatigue=Math.max(0,p.fatigue-35);render();show("train");document.getElementById("trainLog").innerText=msg}
+function showRecord(){let reach=p.true?"宇宙大会優勝":p.world?"世界大会優勝":p.hist.length?p.hist[p.hist.length-1].stage:"なし";document.getElementById("record").innerHTML=`<b>ゲームクリア / 引退</b><br>最高到達：${reach}<br>最高記録：${p.best||"なし"}秒<br><br>`+p.hist.map(h=>`${h.grade}年 ${h.stage}：${h.rank}位 ${h.time}秒 / ${h.combo}`).join("<br>");show("recordScreen")}
 render();
-
-document.getElementById("trainLog").innerText=
-"次の大会へ向けて育成開始";
-
-}
-
-render();
-
-</script>
-
-</body>
-</html>
+</script></body></html>
